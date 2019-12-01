@@ -1,0 +1,424 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>首页</title>
+<link rel="stylesheet" href="/bootstrap/bootstrap3/css/bootstrap.min.css">
+<link href="/bootstrap/DataTables/css/dataTables.bootstrap.min.css" rel="stylesheet">
+<style>
+    .aclass
+    {
+        border-style: solid;
+        border-color: red
+    }
+</style>
+</head>
+<body>
+
+
+
+<!--左侧菜单-->
+<div>
+<div class="sec-mainL left">
+    <div class="mainL-hd-box">
+        <h2 class="mainL-hd"><a href="#">购物返彩贝商家</a></h2>
+    </div>
+
+    <!--菜单列表-->
+    <ul class="sec-mainNav" id="menuId">
+
+    </ul>
+</div>
+
+<div  style="width: 1200px;float: left;padding-left: 20px">
+    <div style="float: right;margin-bottom: 25px">
+    <span class="layui-breadcrumb" lay-separator="-">
+  <a href="" >首页</a>
+  <a href="#" onclick="openLogin()">登录</a>
+  <a href="">个人中心</a>
+  <a><cite>正文</cite></a>
+</span></div>
+        <div  style="height: 140px;width: 800px;padding-left: 20px">
+             <div class="row" id="typeDiv">
+
+             </div>
+            <div class="row" id="brandDiv">
+
+            </div>
+        </div>
+    <div style="padding-top: 50px">
+        <div class="container" >
+            <div class="row">
+                <div class="panel panel-success">
+                    <div class="panel-heading">商品查询</div>
+                    <div class="panel-body">
+                    </div>
+                </div>
+
+            </div>
+            <div style="width: 102.7%;background-color: blue;margin-left: -15px">
+                <button class="btn btn-info" onclick="toCartHtml()" type="button"><i class="glyphicon glyphicon-shopping-cart"></i>我的购物车<span class="badge" id="cartCount">0</span></button>
+            </div>
+            <div class="row">
+                <div class="panel panel-info">
+                    <div class="panel-heading">商品列表</div>
+                    <div class="panel-body">
+                        <table id="productTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th>主键</th>
+                                <th>商品名称</th>
+                                <th>宣传标题</th>
+                                <th>商品图片</th>
+                                <th>商品价格</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th>主键</th>
+                                <th>商品名称</th>
+                                <th>宣传标题</th>
+                                <th>商品图片</th>
+                                <th>商品价格</th>
+                                <th>操作</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script type="text/javascript" src="/js/jquery-3.3.1.js"></script>
+<script src="/bootstrap/bootstrap3/js/bootstrap.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/bootstrap/DataTables/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/bootstrap/DataTables/js/dataTables.bootstrap.min.js"></script>
+<script  src="/js/cookieUtil.js" type="text/javascript"></script>
+<script  src="/js/ajaxSetup.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function() {
+        initClassifyAll()
+        var token=sessionStorage.getItem("token");
+        //alert(token)
+        ajaxSetup(token)
+        if(token!=null){
+            getCartCount()
+        }
+        findProductList()
+        var $top = $('.sec-mainNav').offset().top + $('.sec-mainNav').height()
+        //左侧导航动画
+        $('.sec-mainNav li').on('mouseenter', function() {
+            var pid = $(this).attr("pid");
+            //console.log(this)
+            //类型
+            var str='<div class="menu-panel">';
+            var typeHtml=queryTypeById(pid);
+            str+=typeHtml;
+            //拼接品牌
+           var brandHtml= findBrandListByTypeId(pid)
+           str+=brandHtml
+            str+='<a href="javascript:void(0)" class="menu-panel-btn">';
+           str+='<span>查看全部商家</span><em></em></a></div>';
+            $(this).append(str)
+            var $height = $(this).offset().top + $(this).find('.menu-panel').outerHeight();
+            $(this).find('.menu-panel').show();
+            if($height - $top >= 0) {
+                $(this).find('.menu-panel').css({
+                    top: -($height - $top) + 'px'
+                })
+            }
+        });
+        $('.sec-mainNav li').on('mouseleave', function() {
+            $(this).find('.menu-panel').hide();
+        });
+
+
+  /*      $.ajaxSetup({
+            beforeSend: function (XMLHttpRequest) {
+                XMLHttpRequest.setRequestHeader("token", token);
+            },
+            complete:function(XMLHttpRequest,textStatus) {
+                //通过XMLHttpRequest取得响应头，sessionstatus
+                var noright = XMLHttpRequest.getResponseHeader("NORIGHT");
+               // alert("返回的状态码"+noright)
+                if (noright == "2006") {
+                    //这里怎么处理在你，这里跳转的登录页面
+                    location.href = "/login.html";
+                }
+            }
+        })*/
+
+    });
+    //设置全局ajax
+    function getCartCount() {
+            $.ajax({
+                url:"http://localhost:8095/cart",
+                type:"get",
+                success:function (result) {
+                    if(result.code==200){
+                        $("#cartCount").html(result.data)
+                    }
+                }
+            })
+
+    }
+//拼接类型
+    function queryTypeById(pid) {
+        var typeHtml='<div class="menu-panel-hd">';
+        typeHtml+='<h3>热门分类</h3><div class="sub-group">';
+        for(var i=0;i<data.length;i++){
+            if(data[i].id==pid){
+                for(var k=0;k<data[i].classifyVolist.length;k++){
+                    typeHtml+="<a href='#' sonId='"+data[i].classifyVolist[k].id+"' oneId='"+pid+"' onclick='getProductByTypeId(this,1)'><span class='spens'>"+data[i].classifyVolist[k].classifyName+"</spen></a>";
+                }
+                break;
+            }
+        }
+        typeHtml+='</div></div>';
+        return typeHtml;
+    }
+    //查询所有类型
+    var data;
+    function initClassifyAll() {
+        $.ajax({
+            url:"http://localhost:8091/classify",
+            type:"get",
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                //console.info(result)
+                 data=result.data;
+                var str="";
+                for(var i=0;i<data.length;i++){
+                    str+="<li pid='"+data[i].id+"'>";
+                    str+="<h3>"+data[i].classifyName+"</h3>";
+                    if(data[i].classifyVolist.length>0){
+                        str+=" <div class='menu-tab'>";
+                        for(var j=0;j<data[i].classifyVolist.length;j++){
+                            if(j<3){
+                                str+=" <a href='#' oneId='"+data[i].id+"' sonId='"+data[i].classifyVolist[j].id+"' onclick='getProductByTypeId(this,1)'>"+data[i].classifyVolist[j].classifyName+"</a>";
+                            }
+                        }
+                        str+="<div class=\"fix\"></div>\n" +
+                            "</div> <span class=\"menu-more\">更多</span>";
+
+                    }
+                    str+="</li>";
+                }
+                $("#menuId").html(str);
+
+            }
+        })
+    }
+    //根据类型查询品牌
+    function findBrandListByTypeId(typeId) {
+        var  brandHtml="";
+        $.ajax({
+            url:"http://localhost:8093/brand/"+typeId,
+            type:"get",
+            async:false,
+            success:function (result) {
+                if(result.code==200){
+                    var data=result.data;
+                      brandHtml+='<div class="menu-panel-bd"><ul>';;
+                    for(var i=0;i<data.length;i++){
+                        brandHtml+='<li><a href="javascript:void(0)" oneId="'+typeId+'" brandId="'+data[i].id+'" onclick="getProductByTypeId(this,1)"><img src="https://lizihan.oss-cn-beijing.aliyuncs.com/'+data[i].brandPicture + '"></a></li>';
+                    }
+                    brandHtml+='</ul> ';
+                    brandHtml+='</div>';
+                }
+            }
+        })
+        return brandHtml;
+    }
+    function openLogin(){
+        window.location.href="login.html"
+    }
+    var sonId="";
+    var brandId="";
+    function getProductByTypeId(obj,type) {
+        var oneId=$(obj).attr("oneId");
+         sonId=$(obj).attr("sonId");
+         brandId=$(obj).attr("brandId");
+        if(typeof (sonId)=="undefined"){
+            sonId=null;
+            sonId=oneId;
+        }
+        if(typeof (brandId)=="undefined"){
+            brandId=null
+        }
+        if(type==1){
+            showClassifyDiv(oneId,sonId)
+            showBrandDiv(oneId,brandId);
+        }else {
+            //console.log(brandId)
+            if(brandId!=null){
+                //console.log(obj)
+                $(".img1").each(function () {
+                    $(this).removeClass("aclass");
+                })
+                $(obj).addClass("aclass")
+            }else {
+                var as = $(obj).siblings();
+
+                as.each(function () {
+                    $(this).removeClass("aclass");
+                })
+                $(obj).addClass("aclass")
+            }
+            $(".aclass").each(function () {
+                oneId=$(this).attr("oneId");
+                brandId=$(this).attr("brandId");
+                if(typeof ($(this).attr("sonId"))!="undefined"){
+                    sonId=$(this).attr("sonId");
+                    //sonId=oneId;
+                }
+            })
+            console.log(sonId)
+        }
+        search()
+    }
+    //拼接分类
+    function showClassifyDiv(oneId,sonId) {
+        var typeHtml='<div class="menu-panel-hd">';
+        typeHtml+='<h3>热门分类</h3><div class="sub-group">';
+        for(var i=0;i<data.length;i++){
+            if(data[i].id==oneId){
+                for(var k=0;k<data[i].classifyVolist.length;k++){
+                    if(data[i].classifyVolist[k].id==sonId){
+                        typeHtml+="<a href='javascript:void(0)' onclick='getProductByTypeId(this,2)' class='aclass' oneId='"+oneId+"' sonId='"+data[i].classifyVolist[k].id+"' >"+data[i].classifyVolist[k].classifyName+"</a>";
+                    }else {
+                        typeHtml+="<a href='javascript:void(0)'  onclick='getProductByTypeId(this,2)' oneId='"+oneId+"' sonId='"+data[i].classifyVolist[k].id+"' >"+data[i].classifyVolist[k].classifyName+"</a>";
+                    }
+
+                }
+                break;
+            }
+        }
+        typeHtml+='</div></div>';
+       $("#typeDiv").html(typeHtml)
+    }
+    //显示类别对应的品牌
+    function showBrandDiv(oneId,brandId) {
+        var  brandHtml="";
+        $.ajax({
+            url:"http://localhost:8093/brand/"+oneId,
+            type:"get",
+            async:false,
+            success:function (result) {
+                if(result.code==200){
+                    var data=result.data;
+                    brandHtml+='<div class="menu-panel-bd"><ul>';;
+                    for(var i=0;i<data.length;i++){
+                        if(brandId==data[i].id){
+                            brandHtml+='<li><a href="javascript:void(0)" onclick="getProductByTypeId(this,2)" class="img1 aclass" oneId="'+oneId+'" brandId="'+data[i].id+'"><img src="https://lizihan.oss-cn-beijing.aliyuncs.com/'+data[i].brandPicture + '"></a></li>';
+                        }else {
+                            brandHtml+='<li><a href="javascript:void(0)" class="img1" onclick="getProductByTypeId(this,2)" oneId="'+oneId+'" brandId="'+data[i].id+'"><img src="https://lizihan.oss-cn-beijing.aliyuncs.com/'+data[i].brandPicture + '"></a></li>';
+                        }
+                    }
+                    brandHtml+='</ul> ';
+                    brandHtml+='</div>';
+                }
+            }
+        })
+        $("#brandDiv").html(brandHtml)
+    }
+    var productTable;
+    function findProductList() {
+        productTable=$('#productTable').DataTable(
+            {
+                language: {
+                    url:"/js/Chinese-traditional.json"
+                },
+                "processing": true,
+                "serverSide": true,
+                // 是否允许检索
+                "searching": false,
+                "clickToSelect" : true,
+                "lengthMenu": [5, 15, 30, 65, 100],
+                "ajax": {
+                    url: "http://localhost:8092/product/findProductList",
+                    type: "post"
+                },
+                // 每次DataTable描画后都要调用，调用这个函数时，table可能没有描画完成，
+                // 所以不要在里面操作table的dom，要操作dom应放在initComplete
+                "columns": [
+                    { "data": "id",
+                        "render": function (data, type, row, meta) {
+                            return '<input type="checkbox" value="'+data+'" name="checkName">';
+                        }
+                    },
+                    { "data": "productName" },
+                    { "data": "subtitle" },
+                    {
+                        "data": "mainImg",
+                        "render": function (data, type, row, meta) {
+                            return "<img src='" +data + " ' title='"+row.detail+"' width='80px'>";
+                        }
+                    },
+                    { "data": "price" },
+                    {
+                        "data": function (data) {
+                            return "<div class=\"btn-group\" role=\"group\">\n" +
+                                "  <button type=\"button\" class=\"btn btn-info\" onclick=\'addCart("+data.id+")\'><i class='glyphicon glyphicon-plus'></i>加入购物车</button>\n" +
+                                "</div>";
+                        }
+                    }
+                ],
+            }
+        );
+    }
+    function search() {
+        var v_param=[];
+            v_param.brandId=brandId;
+            v_param.typeId=sonId;
+        productTable.settings()[0].ajax.data=v_param;
+        productTable.ajax.reload();
+    }
+    //新增购物车
+    function addCart(productId) {
+        $.ajax({
+            url:"http://localhost:8095/cart",
+            type:"post",
+            async:false,
+            data:{
+                productId:productId
+            },
+            success:function (result) {
+                    if(result.code==200){
+                        $("#cartCount").html(result.data)
+                    }else {
+                       // alert("请先登录")
+                       // window.location.href="/login.html";
+                    }
+            }
+        })
+    }
+    //跳转到我的购物车页面
+    function toCartHtml() {
+        $.ajax({
+            url:"http://localhost:8095/cart/toCartHtml",
+            type:"get",
+            success:function (result) {
+                if(result.code==200){
+                   // alert(11111)
+                    window.open("/cart/carts.html","_blank")
+                }
+            }
+        })
+    }
+</script>
+<link type="text/css" href="/js/css/style.css" rel="stylesheet" />
+<div id="productDiv" style="display: none">
+
+</div>
+</body>
+</html>

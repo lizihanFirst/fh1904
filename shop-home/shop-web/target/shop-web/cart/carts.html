@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>购物车</title>
+    <link rel="stylesheet" href="../cart/carts/css/reset.css">
+    <link rel="stylesheet" href="../cart/carts/css/carts.css">
+</head>
+<body>
+
+<section class="cartMain">
+
+    <div class="cartMain_hd">
+        <ul class="order_lists cartTop">
+            <li>
+                <!--所有商品全选-->
+                <input type="checkbox" id="all" class="whole_check">
+                <label for="all" id="checkAllStyle" ></label>
+                全选
+            </li>
+            <li class="list_con">商品信息</li>
+            <li class="list_price">单价</li>
+            <li class="list_amount">数量</li>
+            <li class="list_sum">金额</li>
+            <li class="list_op">操作</li>
+        </ul>
+    </div>
+
+    <div class="cartBox">
+        <div class="order_content">
+
+        </div>
+    </div>
+    <!--底部-->
+    <div class="bar-wrapper">
+        <div class="bar-right">
+            <div class="piece">已选商品<strong class="piece_num">0</strong>件</div>
+            <div class="totalMoney">共计: <strong class="total_text">0.00</strong></div>
+            <div class="calBtn"><a href="javascript:;" id="balance">结算</a></div>
+        </div>
+    </div>
+</section>
+<section class="model_bg"></section>
+<section class="my_model">
+    <p class="title">删除宝贝<span class="closeModel">X</span></p>
+    <p>您确认要删除该宝贝吗？</p>
+    <div class="opBtn"><a href="javascript:;" class="dialog-sure">确定</a><a href="javascript:;" class="dialog-close">关闭</a></div>
+</section>
+    <script src="/js/jquery-3.3.1.js"></script>
+    <script src="/js/ajaxSetup.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        var token=sessionStorage.getItem("token");
+        ajaxSetup(token)
+        initCartAll()
+        checkAll()
+    })
+   function initCartAll(){
+        $.ajax({
+            url:"http://localhost:8095/cartShow",
+            type:"get",
+            async:false,
+            success:function (result) {
+                if(result.code==200){
+                    var data=result.data.cartList;
+                    console.info(data)
+                    if(data.length>0){
+                        var cartHtml="";
+                        var checkedCount=0;
+                        for(var i=0;i<data.length;i++){
+                            cartHtml+=' <ul class="order_lists">';
+                            cartHtml+='<li class="list_chk">';
+
+
+                            if(data[i].isChecked){
+                                cartHtml+='<input type="checkbox" name="check" class="son_check" value="'+data[i].productId+'" checked>';
+                                cartHtml+='<label  class="mark"></label>';
+                                checkedCount++;
+                            }else {
+                                cartHtml+='<input type="checkbox" name="check" class="son_check" value="'+data[i].productId+'">';
+                                cartHtml+='<label  class=""></label>';
+                            }
+                            cartHtml+='</li>';
+                            cartHtml+='<li class="list_con">';
+                            cartHtml+='<div class="list_img"><a href="javascript:;"><img src="'+data[i].mainImg+'" alt=""></a></div>';
+                            cartHtml+='<div class="list_text"><a href="javascript:;"><span>'+data[i].productName+'</span></a></div>';
+                            cartHtml+='</li>';
+                            cartHtml+='<li class="list_price">';
+                            cartHtml+='<p class="price">￥<span>'+data[i].price+'</span></p>';
+                            cartHtml+='</li>';
+                            cartHtml+='<li class="list_amount">';
+                            cartHtml+='<div class="amount_box">';
+                            if(data[i].count>1){
+                                cartHtml+='<a href="javascript:;" onclick="subtractCartNum(this)" >-</a>';
+                            }else {
+                                cartHtml+='<a href="javascript:;" class="reduce reSty">-</a>';
+                            }
+
+                            cartHtml+='<input type="text" oldSum="'+data[i].count+'" onchange="changeSum(this)" class="sum" productId="'+data[i].productId+'" value="'+data[i].count+'">';
+                            cartHtml+='<a href="javascript:void(0);" onclick="addCartNum(this)"  class="plus">+</a>';
+                            cartHtml+='</div>';
+                            cartHtml+='</li>';
+                            cartHtml+='<li class="list_sum">';
+                            cartHtml+='<p class="sum_price">￥<span>'+data[i].subtotal+'</span></p>';
+                            cartHtml+='</li>';
+                            cartHtml+='<li class="list_op">';
+                            cartHtml+='<p class="del"><a href="javascript:;" onclick="deleteCart('+data[i].productId+')" class="delBtn">移除商品</a></p>';
+                            cartHtml+='</li>';
+                            cartHtml+='</ul>';
+                        }
+                        $(".order_content").html(cartHtml);
+
+                    }
+                    var total=result.data.total;
+                    $(".piece_num").html(checkedCount);
+                    $(".total_text").html(total);
+                    if(data.length==checkedCount){
+                        $("#checkAllStyle").addClass("mark")
+                        $("#all").attr("checked",true)
+                    }else {
+                        $("#checkAllStyle").removeClass("mark")
+                    }
+                    if(checkedCount>0){
+                        $("#balance").addClass("btn_sty")
+                    }else {
+                        $("#balance").removeClass("btn_sty")
+                    }
+                }
+                checkboxClick()
+            }
+        })
+   }
+   //点击复选框事件
+    function checkboxClick() {
+        //alert(111111)
+        $(".list_chk").click(function () {
+            var value = $(this).find("input");
+            var productId = $(value).val();
+           $.ajax({
+               url:"http://localhost:8095/cartShow",
+               type:"post",
+               data:{
+                   productId:productId
+               },
+               success:function (result) {
+                   if(result.code==200){
+                       $("#all").attr("checked",false)
+                       initCartAll()
+                   }
+               }
+           })
+        })
+    }
+    //改变商品数量事件
+    function changeSum(obj) {
+        var r = /^\+?[1-9][0-9]*$/;
+        var newValue=$(obj).val();
+        var oldValue=$(obj).attr("oldSum");
+        if (!r.test(newValue)) {
+            $(obj).val(oldValue);
+            alert("输入的数字有误");
+            return false;
+        }
+        var sum = $(obj).val();
+        var productId=$(obj).attr("productId")
+        //alert(sum)
+        $.ajax({
+            url:"http://localhost:8095/cartShow/changeProductSum",
+            type:"post",
+            data:{
+                productId:productId,
+                sum:sum
+            },
+            success:function (result) {
+                if(result.code==200){
+                    initCartAll()
+                }
+            }
+        })
+
+    }
+    //增加商品数量
+    function addCartNum(obj){
+        var message = $(obj).prev();
+        var count = $(message).val();
+        count++;
+        $(message).val(count)
+        changeSum(message)
+    }
+    //减少商品数量
+    function subtractCartNum(obj) {
+        var message = $(obj).next();
+        var count = $(message).val();
+        count--;
+        $(message).val(count)
+        changeSum(message)
+    }
+    //全选不全选
+
+    function checkAll() {
+           $("#all").click(function () {
+               var productIds=[];
+               //alert($(this).attr('checked'))
+               if($(this).attr('checked')=="checked"){
+                   var input = $("input[name=check]");
+                    input.each(function () {
+                            productIds.push($(this).val())
+                            $(this).attr("checked",false)
+                    })
+                   checkClick(productIds)
+                   $(this).attr("checked",false)
+               }else if($(this).attr('checked')==undefined) {
+                   var input = $("input[name=check]");
+                   input.each(function () {
+                       if($(this).attr('checked')==undefined){
+                           productIds.push($(this).val())
+                           $(this).attr("checked",true)
+                       }
+                   })
+                   // alert(productIds)
+                   checkClick(productIds)
+                   $(this).attr("checked",true)
+               }
+           })
+    }
+    function checkClick(productIds) {
+        var s = productIds.join(",");
+        $.ajax({
+            url:"http://localhost:8095/cartShow/isCheckAll",
+            type:"post",
+            data:{
+                productIds:s
+            },
+            success:function (result) {
+                if(result.code==200){
+                    initCartAll()
+                }
+            }
+        })
+    }
+    //删除购物车车中的商品
+    function deleteCart(productId) {
+        $.ajax({
+            url:"http://localhost:8095/cartShow/deleteCart",
+            type:"post",
+            data:{
+                productId:productId
+            },
+            success:function (result) {
+                if(result.code==200){
+                    alert("删除成功")
+                    initCartAll()
+                }
+            }
+        })
+    }
+
+/*    var $allSonCheckBox=$(".son_check");
+    $allSonCheckBox.click(function () {
+        if ($(this).is(':checked')) {
+            $(this).next('label').addClass('mark');
+        } else {
+            $(this).next('label').removeClass('mark');
+        }
+        checkedProduct();
+    })
+
+
+    function checkedProduct(){
+        var productChecked=$allSonCheckBox;
+        var checkedIds="";
+        var notCheckIds="";
+        $.each(productChecked,function(){
+            if($(this).prop("checked")){
+                checkedIds+=";"+$(this).val();
+            }else{
+                notCheckIds+=";"+$(this).val();
+            }
+        })
+        $.ajax({
+            url:"/changeCheckBox",
+            data:{
+                checkedIds:checkedIds,
+                notCheckIds:notCheckIds
+            },
+            dataType:"json",
+            type:"post",
+            success:function(result){
+                if(result.code==200){
+                    location.href="/toCarts";
+                }
+            }
+        })
+
+    }
+    $(".whole_check").click(function(){
+        var $allCheckBox=$("input[type='checkbox']");
+        if($(this).is(":checked")){
+                $allCheckBox.prop("checked", true);
+                $allCheckBox.next('label').addClass('mark');
+            }else{
+            $allCheckBox.prop("checked", false);
+            $allCheckBox.next('label').removeClass('mark');
+            }
+        checkedProduct();
+
+    })
+
+    var $all_sum = $('.sum');
+    $all_sum.blur(function () {
+        var r = /^\+?[1-9][0-9]*$/;
+        var newValue=$(this).val();
+        var oldValue=$(this).attr("oldSum");
+        if (!r.test(newValue)) {
+            $(this).val(oldValue);
+            alert("输入的数字有误");
+            return false;
+        }
+        if(newValue!=oldValue){
+            var productId=$(this).attr("productId");
+            $.ajax({
+                url:"/changCartNum",
+                data:{
+                    productId:productId,
+                    newNum:newValue
+                },
+                dataType:"json",
+                type:"post",
+                success:function(result){
+                    if(result.code==200){
+                        location.href="/toCarts";
+                    }
+                }
+            })
+        }
+
+    })*/
+
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC
+                "-//mybatis.org//DTD Mapper 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.mapper.IProductMapper">
+    <select id="getProductByTypeId" resultType="com.fh.bean.ProductBean">
+      select t.*from(
+       select DISTINCT sp.id,productName,subtitle,detail,main_Img mainImg,price,stock from t_shop_product
+      sp left join t_product_type pt on sp.id=pt.productId left join t_shop_brand sb on sp.brand_id=sb.id
+        where sp.status=1
+      <if test="typeId!=null and typeId!=''">
+          and pt.typeId=#{typeId}
+      </if>
+        <if test="brandId!=null and brandId!=''">
+            and sp.brand_id=#{brandId}
+        </if>
+       order by sp.id desc
+      ) t limit #{start},#{size}
+
+  </select>
+    <select id="findCount" resultType="int">
+        select count(DISTINCT sp.id) from t_shop_product sp left join t_product_type pt on sp.id=pt.productId
+        left join t_shop_brand sb on sp.brand_id=sb.id
+        where status=1
+        <if test="typeId!=null and typeId!=''">
+            and pt.typeId=#{typeId}
+        </if>
+        <if test="brandId!=null and brandId!=''">
+            and sp.brand_id=#{brandId}
+        </if>
+    </select>
+    <select id="getProductById" resultType="com.fh.bean.ProductBean">
+        select id,productName,subtitle,detail,main_Img mainImg,price,stock
+        from t_shop_product where id=#{productId}
+    </select>
+</mapper>
