@@ -9,9 +9,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 @Data
-@TableName("t_order")
+@TableName("t_shop_order")
 public class OrderBean implements Serializable {
-    @TableId(value = "id",type = IdType.UUID)
+    @TableId(value = "id",type = IdType.INPUT)
     private String id;
     @TableField("userId")
     private Integer userId;//用户id

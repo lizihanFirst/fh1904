@@ -27,6 +27,7 @@ public class  SystemConst {
 			public static final String REDIS_CLASSIFY_LIST="classifyAll";
 			public static final String REDIS_BRAND_LIST="brandAll";
 			public static final String USER_PHONE="phone";
+			public static final Integer ORDER_STATUS_WAIT_PAY=100;
 
 
 

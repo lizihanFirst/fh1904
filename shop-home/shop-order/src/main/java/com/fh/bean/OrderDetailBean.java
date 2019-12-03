@@ -11,8 +11,6 @@ import java.math.BigDecimal;
 @Data
 @TableName("t_shop_order_detail")
 public class OrderDetailBean implements Serializable {
-    @TableId(value = "id",type = IdType.AUTO)
-    private Integer id;
     @TableField("orderId")
     private String orderId;//订单id
     @TableField("userId")

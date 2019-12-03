@@ -7,6 +7,7 @@ import com.fh.bean.CartBean;
 import com.fh.commons.ServerResult;
 import com.fh.service.ICartService;
 import com.fh.utils.HttpClientUtil;
+import com.fh.utils.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class ICartServiceImpl implements ICartService {
     @Override
     public ServerResult addCart(Integer productId,String phone) {
         ///获取购物车id
-        String cartId = (String) redisTemplate.opsForValue().get("cartId_" + phone);
+        String cartId = (String) redisTemplate.opsForValue().get(RedisKeyUtil.getCartKey(phone));
         //获取商品信息
         String url="http://localhost:8092/productSearch/"+productId;
         String result = HttpClientUtil.doGet(url);

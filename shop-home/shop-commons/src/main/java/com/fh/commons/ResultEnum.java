@@ -21,6 +21,7 @@ public enum ResultEnum {
     TOKEN_ISNULL(2006,"token已失效，请重新登录"),
     TOKEN_OVERTIME(2007,"解析超时了"),
     TOKEN_RESOLVE_NULL(2007,"解析失败了"),
+    PRODUCT_UNDERSTOCK_ALL_ERROR(2008,"商品数量都不够"),
     ;
     private int code;
     private String msg;

@@ -14,7 +14,7 @@ import java.util.Date;
 @TableName("t_paylog")
 public class PayLogBean implements Serializable {
     //支付单号
-    @TableId(value = "outTradeNo",type = IdType.UUID)
+    @TableId(value = "outTradeNo",type = IdType.INPUT)
     private String outTradeNo;
     @TableField("orderId")
     private String orderId;//订单id

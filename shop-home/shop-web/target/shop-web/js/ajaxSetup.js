@@ -9,7 +9,7 @@ function ajaxSetup(token) {
             // alert("返回的状态码"+noright)
             if (noright == "2006") {
                 //这里怎么处理在你，这里跳转的登录页面
-                location.href = "/login.html";
+                location.href = "/login/login.html";
             }
         }
     })
