@@ -9,9 +9,12 @@ import java.math.BigDecimal;
 public class CartBean implements Serializable {
     private Integer productId;
     private String productName;
+    private String subtitle;
+    private String detail;
     private String mainImg;
     private BigDecimal price;
     private Integer count;
     private BigDecimal subtotal;//小计
     private Boolean isChecked;
+    private Boolean isStock;
 }

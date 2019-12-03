@@ -39,7 +39,7 @@
         <div class="bar-right">
             <div class="piece">已选商品<strong class="piece_num">0</strong>件</div>
             <div class="totalMoney">共计: <strong class="total_text">0.00</strong></div>
-            <div class="calBtn"><a href="javascript:;" id="balance">结算</a></div>
+            <div class="calBtn"><a href="javascript:;" onclick="toOrder()" id="balance">结算</a></div>
         </div>
     </div>
 </section>
@@ -74,9 +74,7 @@
                         for(var i=0;i<data.length;i++){
                             cartHtml+=' <ul class="order_lists">';
                             cartHtml+='<li class="list_chk">';
-
-
-                            if(data[i].isChecked){
+                            if(data[i].isChecked && data[i].isStock){
                                 cartHtml+='<input type="checkbox" name="check" class="son_check" value="'+data[i].productId+'" checked>';
                                 cartHtml+='<label  class="mark"></label>';
                                 checkedCount++;
@@ -86,7 +84,7 @@
                             }
                             cartHtml+='</li>';
                             cartHtml+='<li class="list_con">';
-                            cartHtml+='<div class="list_img"><a href="javascript:;"><img src="'+data[i].mainImg+'" alt=""></a></div>';
+                            cartHtml+='<div class="list_img"><a href="javascript:;"><img src="'+data[i].mainImg+'" alt="'+data[i].subtitle+'"></a></div>';
                             cartHtml+='<div class="list_text"><a href="javascript:;"><span>'+data[i].productName+'</span></a></div>';
                             cartHtml+='</li>';
                             cartHtml+='<li class="list_price">';
@@ -101,11 +99,20 @@
                             }
 
                             cartHtml+='<input type="text" oldSum="'+data[i].count+'" onchange="changeSum(this)" class="sum" productId="'+data[i].productId+'" value="'+data[i].count+'">';
-                            cartHtml+='<a href="javascript:void(0);" onclick="addCartNum(this)"  class="plus">+</a>';
+                           if(data[i].isStock){
+                                cartHtml+='<a href="javascript:void(0);" onclick="addCartNum(this)"  class="plus">+</a>';
+                            }else{
+                               cartHtml+='<a href="javascript:void(0);"   class="plus reSty">+</a>';
+                            }
+
                             cartHtml+='</div>';
                             cartHtml+='</li>';
                             cartHtml+='<li class="list_sum">';
-                            cartHtml+='<p class="sum_price">￥<span>'+data[i].subtotal+'</span></p>';
+                            if(data[i].isStock){
+                                cartHtml+='<p class="sum_price">￥<span>'+data[i].subtotal+'</span></p>';
+                            }else {
+                                cartHtml+='<p class="sum_price">￥<span>'+data[i].subtotal+'</span>无货</p>';
+                            }
                             cartHtml+='</li>';
                             cartHtml+='<li class="list_op">';
                             cartHtml+='<p class="del"><a href="javascript:;" onclick="deleteCart('+data[i].productId+')" class="delBtn">移除商品</a></p>';
@@ -258,7 +265,10 @@
             }
         })
     }
-
+//跳转到结算页面
+    function toOrder() {
+        window.open("/order.html","_blank")
+    }
 /*    var $allSonCheckBox=$(".son_check");
     $allSonCheckBox.click(function () {
         if ($(this).is(':checked')) {

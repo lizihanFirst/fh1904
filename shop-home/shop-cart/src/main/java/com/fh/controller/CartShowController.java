@@ -82,4 +82,14 @@ public class CartShowController {
         cartService.deleteCart(productId,phone);
         return ServerResult.success();
     }
+    /**
+     * 查询被选中的商品信息
+     */
+    @GetMapping("/findProductList")
+    @LoginAnnotation
+    public ServerResult findProductList(HttpServletRequest request){
+        String phone = (String) request.getAttribute("phone");
+        Map<String,Object> cartMap=cartService.findProductList(phone);
+        return ServerResult.success(cartMap);
+    }
 }

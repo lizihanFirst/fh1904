@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC
+                "-//mybatis.org//DTD Mapper 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fh.mapper.IAddressMapper">
+ <select id="findAddressByUserId" resultType="com.fh.bean.AddressBean">
+     select id,consignee,address,insert(phone, 4, 4, 'XXXX') phone,mailbox,addressByName,isDefault from
+     t_address where userId=#{userId} order by checkTime desc
+ </select>
+</mapper>

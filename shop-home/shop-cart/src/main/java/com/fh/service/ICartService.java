@@ -46,4 +46,11 @@ public interface ICartService {
      * @param phone
      */
     void deleteCart(Integer productId, String phone);
+
+    /**
+     * 查询所有被选中的商品
+     * @param phone
+     * @return
+     */
+    Map<String,Object> findProductList(String phone);
 }

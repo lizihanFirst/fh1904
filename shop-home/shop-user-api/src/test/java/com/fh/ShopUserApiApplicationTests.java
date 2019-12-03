@@ -8,13 +8,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import sun.misc.BASE64Encoder;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ShopUserApiApplicationTests {
-
+    @Test
+    public void time(){
+        System.out.println("1111111111111111111111111"+TimeZone.getDefault()); //输出当前默认时区
+        final TimeZone zone = TimeZone.getTimeZone("GMT+8"); //获取中国时区
+        TimeZone.setDefault(zone); //设置时区
+        System.out.println("2222222222222222222222222222222"+TimeZone.getDefault()); //输出验证
+        System.out.println("3333333333333333"+new Date()); //输出验证
+    }
     @Test
     public void testJwt() {
         //设置头部

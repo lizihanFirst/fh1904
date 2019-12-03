@@ -26,7 +26,7 @@ public class JwtUtil {
        payloadMap.putAll(map);
         //设置过期时间
         long millis = System.currentTimeMillis();
-        payloadMap.put("exp",millis+1800000l);
+        payloadMap.put("exp",millis+18000000l);
         payloadMap.put("lat",millis);
         String token = Jwts.builder()
                 .setHeader(headerMap)
