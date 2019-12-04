@@ -22,11 +22,5 @@ public class OrderController {
         String phone= (String) request.getAttribute("phone");
         return orderService.submitOrder(addressId,phone);
     }
-    @PostMapping
-    @LoginAnnotation
-    public ServerResult getPayOrder(String outTradeNoId,HttpServletRequest request){
-        String phone= (String) request.getAttribute("phone");
-        PayLogBean payLogBean=orderService.getPayOrder(outTradeNoId,phone);
-        return ServerResult.success(payLogBean);
-    }
+
 }

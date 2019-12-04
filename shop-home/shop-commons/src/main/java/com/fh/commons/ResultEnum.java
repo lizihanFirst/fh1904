@@ -22,6 +22,10 @@ public enum ResultEnum {
     TOKEN_OVERTIME(2007,"解析超时了"),
     TOKEN_RESOLVE_NULL(2007,"解析失败了"),
     PRODUCT_UNDERSTOCK_ALL_ERROR(2008,"商品数量都不够"),
+    PAY_ORDER_NULL(3001,"支付订单不存在"),
+    CRATER_PAY_ERROR(3002,"二维码生成失败"),
+    PAY_TIMEOUT(3003,"二维码已过期，请刷新页面重新获取二维码。"),
+
     ;
     private int code;
     private String msg;

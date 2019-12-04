@@ -21,7 +21,7 @@ public class PayLogBean implements Serializable {
     @TableField("userId")
     private Integer userId;//用户id
     @TableField("transactionId")
-    private Integer transactionId;//事务id
+    private String transactionId;//事务id
     @TableField("createTime")
     private Date createTime;//创建时间
     @TableField("payTime")

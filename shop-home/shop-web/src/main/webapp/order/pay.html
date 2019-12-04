@@ -7,8 +7,6 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 		<title>微信支付页</title>
         <link rel="icon" href="/assets/img/favicon.ico">
-		
-	
     <link rel="stylesheet" type="text/css" href="/js/shop/css/webbase.css" />
     <link rel="stylesheet" type="text/css" href="/js/shop/css/pages-weixinpay.css" />
 </head>
@@ -26,24 +24,21 @@
 				<div class="checkout-steps">
 					<div class="fl weixin">微信支付</div>
                     <div class="fl sao"> 
-                        <p class="red">二维码已过期，刷新页面重新获取二维码。</p>                      
+                        <p class="red">二维码已生成,请扫码完成支付</p>
                         <div class="fl code">
-                            <img src="/js/shop/img/erweima.png" alt="">
+                         <div id="codeImg"></div>
                             <div class="saosao">
                                 <p>请使用微信扫一扫</p>
                                 <p>扫描二维码支付</p>
                             </div>
                         </div>
                         <div class="fl phone">
-                            
                         </div>
-                        
                     </div>
                     <div class="clearfix"></div>
-				    <p><a href="pay.html" >> 其他支付方式</a></p>
+				    <p><a href="" >> 其他支付方式</a></p>
 				</div>
 			</div>
-
 		</div>
 		<!-- 底部栏位 -->
 		<!--页面底部-->
@@ -53,49 +48,39 @@
 			<div class="Mod-service">
 				<ul class="Mod-Service-list">
 					<li class="grid-service-item intro  intro1">
-
 						<i class="serivce-item fl"></i>
 						<div class="service-text">
 							<h4>正品保障</h4>
 							<p>正品保障，提供发票</p>
 						</div>
-
 					</li>
 					<li class="grid-service-item  intro intro2">
-
 						<i class="serivce-item fl"></i>
 						<div class="service-text">
 							<h4>正品保障</h4>
 							<p>正品保障，提供发票</p>
 						</div>
-
 					</li>
 					<li class="grid-service-item intro  intro3">
-
 						<i class="serivce-item fl"></i>
 						<div class="service-text">
 							<h4>正品保障</h4>
 							<p>正品保障，提供发票</p>
 						</div>
-
 					</li>
 					<li class="grid-service-item  intro intro4">
-
 						<i class="serivce-item fl"></i>
 						<div class="service-text">
 							<h4>正品保障</h4>
 							<p>正品保障，提供发票</p>
 						</div>
-
 					</li>
 					<li class="grid-service-item intro intro5">
-
 						<i class="serivce-item fl"></i>
 						<div class="service-text">
 							<h4>正品保障</h4>
 							<p>正品保障，提供发票</p>
 						</div>
-
 					</li>
 				</ul>
 			</div>
@@ -174,7 +159,8 @@
 	</div>
 </div>
 <script type="text/javascript" src="/js/jquery-3.3.1.js"></script>
-		<script src="/js/ajaxSetup.js"></script>
+<script src="/js/ajaxSetup.js"></script>
+<script src="/js/qrcode.min.js"></script>
 <script>
 	$(function () {
         var token=sessionStorage.getItem("token");
@@ -183,26 +169,53 @@
     })
 	//查询支付订单号
 	function getPayOrder() {
-		var orderId=sessionStorage.getItem("orderId")
-		var outTradeNoId=sessionStorage.getItem("outTradeNoId");
+		var outTradeNo=sessionStorage.getItem("outTradeNoId");
+		if(outTradeNo==null){
+		    alert("支付二维码生成失败，没有要支付的订单")
+			return false;
+		}
 		$.ajax({
-			url:"http://localhost:8096/order",
-			type:"post",
+			url:"http://localhost:8096/pays/"+outTradeNo,
+			type:"get",
+			success:function (result) {
+			    console.info(result)
+				if(result.code==200){
+				    var outTradeNo=result.data.outTradeNo;
+				    var payMoney=result.data.payMoney;
+				    var codeUrl=result.data.codeUrl;
+					$("#outTradeNoId").html("订单提交成功，请您及时付款！订单号："+outTradeNo)
+					$(".money").html("￥"+payMoney);
+					new QRCode(document.getElementById("codeImg"),codeUrl);
+                    checkPayStatus()
+				}else {
+				    alert(result.msg)
+				}
+            }
+		})
+    }
+    function checkPayStatus() {
+        var outTradeNo=sessionStorage.getItem("outTradeNoId");
+        if(outTradeNo==null){
+            alert("支付二维码生成失败，没有要支付的订单")
+            return false;
+        }
+        $.ajax({
+			url:"http://localhost:8096/pays",
+			type:"put",
 			data:{
-                outTradeNoId:outTradeNoId
+                outTradeNo:outTradeNo
 			},
 			success:function (result) {
 				if(result.code==200){
-				    var data=result.data;
-				    console.info(data)
-					$("#outTradeNoId").html("订单提交成功，请您及时付款！订单号："+data.outTradeNo)
-					$(".money").html("￥"+data.payMoney);
+				    window.location.href="/order/paysuccess.html";
+				}else {
+				    $(".red").html(result.msg)
 				}
             }
 		})
     }
 </script>
-<!--页面底部END-->
+
 </body>
 
 </html>

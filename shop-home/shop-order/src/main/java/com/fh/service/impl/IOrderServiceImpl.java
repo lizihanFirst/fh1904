@@ -132,16 +132,5 @@ public class IOrderServiceImpl implements IOrderService {
         return ServerResult.success(map);
     }
 
-    /**
-     * 查询支付订单
-     * @param outTradeNoId
-     * @param phone
-     * @return
-     */
-    @Override
-    public PayLogBean getPayOrder(String outTradeNoId, String phone) {
-        //获取存入redis的支付订单数据
-        PayLogBean cartId = (PayLogBean) redisTemplate.opsForHash().get(RedisKeyUtil.getWaitPayKey(phone),outTradeNoId);
-        return cartId;
-    }
+
 }

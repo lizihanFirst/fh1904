@@ -2,7 +2,7 @@ package com.fh.utils;
 
 public class RedisKeyUtil {
     public static final String getCartKey(String phone){
-        return "cart_"+phone;
+        return "cartId_"+phone;
     }
     public static final String getUserKey(String phone){
         return "user_"+phone;

@@ -14,11 +14,5 @@ public interface IOrderService {
      */
     ServerResult submitOrder(Integer addressId, String phone);
 
-    /**
-     * 查询支付订单
-     * @param outTradeNoId
-     * @param phone
-     * @return
-     */
-    PayLogBean getPayOrder(String outTradeNoId, String phone);
+
 }

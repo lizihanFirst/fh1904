@@ -6,6 +6,7 @@ import com.fh.bean.UserBean;
 import com.fh.commons.SystemConst;
 import com.fh.service.IUserService;
 import com.fh.utils.JwtUtil;
+import com.fh.utils.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +51,7 @@ public class UserController {
             return ServerResult.error(ResultEnum.REDIS_CODE_NULL);
         }
         UserBean userBean=userService.isRegister(phone);
-        redisTemplate.opsForValue().set("cartId_"+phone,userBean.getCartId());
+        redisTemplate.opsForValue().set(RedisKeyUtil.getCartKey(phone),userBean.getCartId());
         redisTemplate.opsForValue().set("user_"+phone,userBean);
         redisTemplate.delete("code_" + phone);
         Map<String,Object> map=new HashMap<String,Object>();
